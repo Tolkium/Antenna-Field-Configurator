@@ -1,6 +1,13 @@
 #include "config.h"
 #include "html_pages.h"
 #include <ctype.h>
+#if __has_include("config_wifi.local.h")
+#include "config_wifi.local.h"
+#endif
+#ifndef WIFI_SSID_DEFAULT
+#define WIFI_SSID_DEFAULT ""
+#define WIFI_PASS_DEFAULT ""
+#endif
 
 // --- Globálne premenné a stavy ---
 char currentStates[8] = {'C','C','C','C','C','C','C','C'}; 
@@ -18,8 +25,8 @@ bool pca9685Present = false;
 
 // --- Konfigurácia úložísk a sietí (NVS) ---
 Preferences prefs;
-String wifi_ssid     = "";
-String wifi_password = "";
+String wifi_ssid     = WIFI_SSID_DEFAULT;
+String wifi_password = WIFI_PASS_DEFAULT;
 String currentPin    = "1234";
 String staticIP = "0.0.0.0"; // Lokálna kópia IP adresy, aby sme nedopytovali sieťovú kartu
 int maxBrightness = 1500; // 0–4095, odvodené z ledPercent
@@ -141,10 +148,31 @@ void redirectBusy() {
   redirectHome("?busy=1");
 }
 
+bool wantsAjaxReply() {
+  return server.hasArg("ajax");
+}
+
+void replyBusy() {
+  if (wantsAjaxReply()) {
+    server.send(409, "application/json; charset=utf-8", jsonHubStatus());
+    return;
+  }
+  redirectBusy();
+}
+
+void replyAfterAntennaTx() {
+  if (wantsAjaxReply()) {
+    server.send(200, "application/json; charset=utf-8", jsonHubStatus());
+    return;
+  }
+  redirectHome();
+}
+
 // Operátor mení anténu → stand-by (utlmenie chýb/RS485/LED) sa ruší
 void cancelStandbyForOperatorChange() {
   if (!isStandbyActive) return;
   isStandbyActive = false;
+  if (nodeAnomaly == "STANDBY") nodeAnomaly = sensorStatus;
   invalidateLEDCache();
   persistStandbyFlag();
 }
@@ -181,7 +209,7 @@ void handleSet() {
   if (!isAuthorized()) { server.sendHeader("Location", "/"); server.send(303); return; }
 
   if (waitingForReply) {
-    redirectBusy();
+    replyBusy();
     return;
   }
 
@@ -199,7 +227,7 @@ void handleSet() {
   Serial.println("[WEB] Nova konfiguracia ulozena do pamate: " + statesToString());
 
   triggerRS485Transmission();
-  sendHTML(true);
+  replyAfterAntennaTx();
 }
 
 void handleUpdateConfig() {
@@ -237,13 +265,20 @@ void handleUpdateConfig() {
 
 void handleProfile() {
   if (!isAuthorized()) { redirectHome(); return; }
-  if (waitingForReply) {
-    redirectBusy();
-    return;
-  }
   if (!server.hasArg("type")) { redirectHome(); return; }
 
   String type = server.arg("type");
+  if (type == "phone" || type == "rtty") {
+    cancelStandbyForOperatorChange();
+    setForkHardware(type == "rtty" ? "RTTY" : "PHONE");
+    replyAfterAntennaTx();
+    return;
+  }
+
+  if (waitingForReply) {
+    replyBusy();
+    return;
+  }
   if (type == "clear_all") {
     for (int i = 0; i < 8; i++) targetStates[i] = 'C';
   } else if (type == "beam_left") {
@@ -260,7 +295,7 @@ void handleProfile() {
   cancelStandbyForOperatorChange();
   persistAntennaStates();
   triggerRS485Transmission();
-  redirectHome();
+  replyAfterAntennaTx();
 }
 void processUSBConsole() {
   // Spracujeme maximálne 1 znak za jeden prebeh loopu (žiadny while)
@@ -355,7 +390,6 @@ void processUSBConsole() {
   }
 }
 
-}
 void processLEDGlows() {
   unsigned long currentMillis = millis();
   static unsigned long lastGlowUpdate = 0;
@@ -609,7 +643,8 @@ void setup() {
   server.collectHeaders(headerkeys, 1);
   server.on("/", handleRoot);
   server.on("/login", HTTP_POST, handleLogin);
-  server.on("/set", handleSet);
+  server.on("/set", HTTP_GET, handleSet);
+  server.on("/set", HTTP_POST, handleSet);
   server.on("/updateConfig", HTTP_POST, handleUpdateConfig);
   // Nový ultra-rýchly endpoint pre JavaScript na pozadí
 server.on("/api/status", HTTP_GET, []() {
