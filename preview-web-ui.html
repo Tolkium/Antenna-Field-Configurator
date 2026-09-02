@@ -59,7 +59,7 @@
     .right .w-A{border-right-color:var(--A)}.right .w-B{border-right-color:var(--B)}.right .w-C{border-right-color:var(--C)}
     .w-pending{border-color:var(--pend)!important;background:linear-gradient(90deg,#372913,#1a140c 50%)!important;animation:webPulse 1.5s infinite ease-in-out}
     @keyframes webPulse{0%{opacity:.72}50%{opacity:1}100%{opacity:.72}}
-    @media(prefers-reduced-motion:reduce){.w-pending,.ticks,.chev{animation:none}.chev{opacity:.72}}
+    @media(prefers-reduced-motion:reduce){.w-pending,.ticks,.chev,button.apply .arr-l,button.apply .arr-r{animation:none}.chev{opacity:.72}}
     .sync{font:9px Consolas,monospace;color:var(--pend);letter-spacing:.08em}
     .actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;align-items:center}
     a.btn,label.btn,button.btn{position:relative;display:inline-block;padding:8px 14px;background:var(--glass);border:1px solid var(--rule);color:var(--ink);text-decoration:none;font:inherit;font-size:11px;letter-spacing:.1em;cursor:pointer;clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%)}
@@ -67,15 +67,19 @@
     a.btn:hover,label.btn:hover,button.btn:hover{border-color:var(--cyan);color:#fff;box-shadow:0 0 12px rgba(62,224,216,.25)}
     a.btn:active,label.btn:active,button.btn:active{border-color:var(--rule);border-top-color:var(--ink);border-bottom-color:var(--ink);box-shadow:0 -6px 14px rgba(228,238,240,.35),0 6px 14px rgba(228,238,240,.35)}
     label.btn input{position:absolute;opacity:0;pointer-events:none}
-    label.btn.on{background:rgba(212,238,242,.28);border-color:rgba(212,238,242,.5);color:#fff;box-shadow:inset 0 0 14px rgba(212,238,242,.18)}
+    label.btn.on,button.btn.on{background:rgba(212,238,242,.28);border-color:rgba(212,238,242,.5);color:#fff;box-shadow:inset 0 0 14px rgba(212,238,242,.18)}
     .fork{margin-left:auto;display:inline-flex;align-items:center;gap:8px}
-    button.apply{position:relative;display:block;width:100%;margin-top:16px;padding:14px 12px;border:0;cursor:pointer;color:#fff;font:700 13px Consolas,monospace;letter-spacing:.26em;text-transform:uppercase;text-shadow:0 0 8px #fff,0 0 18px rgba(62,224,216,.75);background:transparent;overflow:visible}
+    button.apply{position:relative;display:block;width:100%;margin-top:16px;padding:14px 44px;border:0;cursor:pointer;color:#fff;font:700 13px Consolas,monospace;letter-spacing:.26em;text-transform:uppercase;text-shadow:0 0 8px #fff,0 0 18px rgba(62,224,216,.75);background:transparent;overflow:visible}
     button.apply span{position:relative;z-index:1}
-    button.apply:after{content:'';position:absolute;inset:0;pointer-events:none;background:rgba(62,224,216,.14);clip-path:polygon(14px 0,calc(100% - 14px) 0,100% 14px,100% calc(100% - 14px),calc(100% - 14px) 100%,14px 100%,0 calc(100% - 14px),0 14px)}
-    button.apply:before{content:'';position:absolute;inset:0;pointer-events:none;background:linear-gradient(135deg,transparent 46%,#c8ffff 46%,#c8ffff 54%,transparent 54%) left top/14px 14px no-repeat,linear-gradient(225deg,transparent 46%,#c8ffff 46%,#c8ffff 54%,transparent 54%) right top/14px 14px no-repeat,linear-gradient(45deg,transparent 46%,#c8ffff 46%,#c8ffff 54%,transparent 54%) left bottom/14px 14px no-repeat,linear-gradient(-45deg,transparent 46%,#c8ffff 46%,#c8ffff 54%,transparent 54%) right bottom/14px 14px no-repeat,linear-gradient(#c8ffff,#c8ffff) left 14px top 0/1.5% 2px no-repeat,linear-gradient(#c8ffff,#c8ffff) right 14px top 0/1.5% 2px no-repeat,linear-gradient(#c8ffff,#c8ffff) left 14px bottom 0/1.5% 2px no-repeat,linear-gradient(#c8ffff,#c8ffff) right 14px bottom 0/1.5% 2px no-repeat;filter:drop-shadow(0 0 2px #eaffff) drop-shadow(0 0 6px #3ee0d8) drop-shadow(0 0 14px rgba(62,224,216,.75))}
-    button.apply:hover:after{background:rgba(62,224,216,.22)}
+    button.apply:after{content:'';position:absolute;inset:0;pointer-events:none;background:rgba(8,12,16,.92);clip-path:polygon(14px 0,calc(100% - 14px) 0,100% 14px,100% calc(100% - 14px),calc(100% - 14px) 100%,14px 100%,0 calc(100% - 14px),0 14px);filter:drop-shadow(1px 0 0 rgba(62,224,216,.4)) drop-shadow(-1px 0 0 rgba(62,224,216,.4)) drop-shadow(0 1px 0 rgba(62,224,216,.4)) drop-shadow(0 -1px 0 rgba(62,224,216,.4))}
+    button.apply:before{content:'';position:absolute;inset:0;pointer-events:none;z-index:2;background:linear-gradient(135deg,transparent 46%,#c8ffff 46%,#c8ffff 54%,transparent 54%) left top/14px 14px no-repeat,linear-gradient(225deg,transparent 46%,#c8ffff 46%,#c8ffff 54%,transparent 54%) right top/14px 14px no-repeat,linear-gradient(45deg,transparent 46%,#c8ffff 46%,#c8ffff 54%,transparent 54%) left bottom/14px 14px no-repeat,linear-gradient(-45deg,transparent 46%,#c8ffff 46%,#c8ffff 54%,transparent 54%) right bottom/14px 14px no-repeat,linear-gradient(#c8ffff,#c8ffff) left 14px top 0/1.5% 2px no-repeat,linear-gradient(#c8ffff,#c8ffff) right 14px top 0/1.5% 2px no-repeat,linear-gradient(#c8ffff,#c8ffff) left 14px bottom 0/1.5% 2px no-repeat,linear-gradient(#c8ffff,#c8ffff) right 14px bottom 0/1.5% 2px no-repeat;filter:drop-shadow(0 0 2px #eaffff) drop-shadow(0 0 6px #3ee0d8) drop-shadow(0 0 14px rgba(62,224,216,.75))}
+    button.apply:hover:after{background:rgba(12,18,22,.96)}
     button.apply:hover:before{filter:drop-shadow(0 0 3px #fff) drop-shadow(0 0 8px #3ee0d8) drop-shadow(0 0 18px rgba(62,224,216,.9))}
     button.apply:active:before{filter:drop-shadow(0 0 4px #3ee0d8)}
+    button.apply .arr-l,button.apply .arr-r{position:absolute;top:50%;z-index:3;width:8px;height:8px;border-top:2.5px solid #c8ffff;border-right:2.5px solid #c8ffff;pointer-events:none;animation:arrPulse 1.6s ease-in-out infinite;filter:drop-shadow(0 0 2px #eaffff) drop-shadow(0 0 6px #3ee0d8)}
+    button.apply .arr-r{right:18px;transform:translateY(-50%) rotate(45deg)}
+    button.apply .arr-l{left:18px;transform:translateY(-50%) rotate(-135deg)}
+    @keyframes arrPulse{0%,100%{opacity:1}50%{opacity:.28}}
     .set{margin-top:22px;padding-top:14px;border-top:1px solid var(--rule)}
     .set summary{position:relative;cursor:pointer;list-style:none;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink);font-weight:600;display:flex;align-items:center;justify-content:flex-start;gap:12px;user-select:none;padding:6px 8px 6px 12px;border:1px solid var(--rule);background:linear-gradient(90deg,rgba(212,238,242,.1),transparent 55%)}
     .set summary::-webkit-details-marker,.set summary::-moz-list-bullet{display:none}
@@ -101,7 +105,7 @@
     .gate p{margin:6px 0 16px;color:var(--mute);font-size:12px;letter-spacing:.04em}
     .gate input{width:100%;margin:0 0 10px;padding:9px;border:1px solid var(--rule);background:var(--glass);color:var(--ink);text-align:center;letter-spacing:.2em}
     .gate button{width:100%;padding:10px;border:0;background:var(--amber);color:#06080b;font-weight:700;letter-spacing:.16em;text-transform:uppercase;cursor:pointer;clip-path:polygon(10px 0,100% 0,calc(100% - 10px) 100%,0 100%)}
-    @media(max-width:620px){.antenna{grid-template-columns:1fr;gap:8px}.hub{order:-1;margin-bottom:8px;width:100%;max-width:280px;height:auto;aspect-ratio:1}.schem{display:none}.rig{padding:8px 0 4px}.mast{flex-direction:column;align-items:flex-start}.call{text-align:left}.fork{margin-left:0}.mast:before{display:none}}
+    @media(max-width:620px){.antenna{grid-template-columns:1fr 1fr;grid-template-areas:"hub hub" "left right";gap:0 8px;align-items:start}.hub{grid-area:hub;order:0;margin:0 auto;width:min(248px,78vw);max-width:248px;height:auto;aspect-ratio:1/.74;overflow:visible}.hub .cradle,.tick-clip{top:50%}.feed{top:40%;width:48%}.left{grid-area:left}.right{grid-area:right}.col{gap:4px}.pair{grid-template-columns:1fr;gap:4px}.w{min-height:50px;padding:8px 8px;width:100%;gap:8px}.w .id{font-size:14px}.w select{flex:1 1 auto;width:auto;min-width:0;font-size:13px;padding:7px 18px 7px 6px}.schem{display:none}.rig{padding:0 4px;margin:0}.mast{flex-direction:column;align-items:flex-start;margin-bottom:0;padding-bottom:6px}.call{text-align:left}.fork{margin-left:0}.mast:before{display:none}.set summary{padding-right:36px}.set summary::after{left:auto;right:10px;transform:translateY(-50%)}}
 
     .preview-bar{max-width:1080px;margin:0 auto 14px;color:var(--mute);font-size:12px;letter-spacing:.04em}
     .preview-bar .scenes{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
@@ -254,11 +258,11 @@
       <a href="#" id="btn-standby" class="btn btn-standby" onclick="return false;">Stand-by</a>
       <span class="fork">
         <span class="k">Výhybka</span>
-        <label class="btn on"><input type="radio" name="fork_mode" value="PHONE" checked>PHONE</label>
-        <label class="btn"><input type="radio" name="fork_mode" value="RTTY">RTTY</label>
+        <button type="button" class="btn on" data-mode="PHONE">PHONE</button>
+        <button type="button" class="btn" data-mode="RTTY">RTTY</button>
       </span>
     </div>
-    <button type="submit" class="apply"><span>Poslať na stožiar</span></button>
+    <button type="submit" class="apply"><span>Poslať na stožiar</span><i class="arr-l" aria-hidden="true"></i><i class="arr-r" aria-hidden="true"></i></button>
   </form>
 
   <details class="set">
@@ -346,12 +350,12 @@
     }
     requestAnimationFrame(function () { if (window.drawSchem) drawSchem(); });
   }
-  document.querySelectorAll('.fork input').forEach(function (r) {
-    r.addEventListener('change', function () {
-      document.querySelectorAll('.fork label').forEach(function (l) {
-        l.classList.toggle('on', l.querySelector('input').checked);
+  document.querySelectorAll('.fork .btn').forEach(function (b) {
+    b.addEventListener('click', function () {
+      document.querySelectorAll('.fork .btn').forEach(function (x) {
+        x.classList.toggle('on', x === b);
       });
-      document.getElementById('mode-label').textContent = this.value;
+      document.getElementById('mode-label').textContent = b.getAttribute('data-mode');
     });
   });
 

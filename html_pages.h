@@ -36,28 +36,24 @@ static String wireSelectHtml(int idx, const String& label) {
 }
 
 static void hubFields(String& status, String& color, String& t1, String& t2) {
-  t1 = "--.-";
-  t2 = "--.-";
   status = "OK";
   color = "#3ee0d8";
-  if (isStandbyActive) {
+  t1 = (nodeTempMCU > 900.0) ? "CHYBA" : String(nodeTempMCU, 1) + "°C";
+  t2 = (nodeTempRelay > 900.0) ? "CHYBA" : String(nodeTempRelay, 1) + "°C";
+if (isStandbyActive) {
     status = "SPÁNOK";
     color = "#8B6CFF";
+    t1 = "--.-";
+    t2 = "--.-";
   } else if (waitingForReply) {
     status = "ČAKÁ SA";
     color = "#ff9800";
   } else if (nodeAnomaly == "OFFLINE") {
     status = "TIMEOUT";
     color = "#ff3333";
-  } else {
-    t1 = (nodeTempMCU > 900.0) ? "CHYBA" : String(nodeTempMCU, 1) + "°C";
-    t2 = (nodeTempRelay > 900.0) ? "CHYBA" : String(nodeTempRelay, 1) + "°C";
-    if (nodeAnomaly == "OK" || nodeAnomaly == "NONE") {
-      status = "OK";
-    } else {
-      status = nodeAnomaly;
-      color = "#ff3333";
-    }
+  } else if (nodeAnomaly != "OK" && nodeAnomaly != "NONE") {
+    status = nodeAnomaly;
+    color = "#ff3333";
   }
 }
 
@@ -72,6 +68,12 @@ String jsonHubStatus() {
   j += htmlEscape(t1);
   j += "\",\"t2\":\"";
   j += htmlEscape(t2);
+  j += "\",\"m\":\"";
+  j += htmlEscape(currentMode);
+  j += "\",\"w\":\"";
+  for (int i = 0; i < 8; i++) j += sanitizeAntennaState(targetStates[i]);
+  j += "\",\"k\":\"";
+  for (int i = 0; i < 8; i++) j += sanitizeAntennaState(currentStates[i]);
   j += "\"}";
   return j;
 }
@@ -141,7 +143,7 @@ void sendHTML(bool loggedIn) {
   sendP(".right .w-A{border-right-color:var(--A)}.right .w-B{border-right-color:var(--B)}.right .w-C{border-right-color:var(--C)}");
   sendP(".w-pending{border-color:var(--pend)!important;background:linear-gradient(90deg,#372913,#1a140c 50%)!important;animation:webPulse 1.5s infinite ease-in-out}");
   sendP("@keyframes webPulse{0%{opacity:.72}50%{opacity:1}100%{opacity:.72}}");
-  sendP("@media(prefers-reduced-motion:reduce){.w-pending,.ticks,.chev{animation:none}.chev{opacity:.72}}");
+  sendP("@media(prefers-reduced-motion:reduce){.w-pending,.ticks,.chev,button.apply .arr-l,button.apply .arr-r{animation:none}.chev{opacity:.72}}");
   sendP(".sync{font:9px Consolas,monospace;color:var(--pend);letter-spacing:.08em}");
   sendP(".actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;align-items:center}");
   sendP("a.btn,label.btn,button.btn{position:relative;display:inline-block;padding:8px 14px;background:var(--glass);border:1px solid var(--rule);color:var(--ink);text-decoration:none;font:inherit;font-size:11px;letter-spacing:.1em;cursor:pointer;clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%)}");
@@ -149,15 +151,19 @@ void sendHTML(bool loggedIn) {
   sendP("a.btn:hover,label.btn:hover,button.btn:hover{border-color:var(--cyan);color:#fff;box-shadow:0 0 12px rgba(62,224,216,.25)}");
   sendP("a.btn:active,label.btn:active,button.btn:active{border-color:var(--rule);border-top-color:var(--ink);border-bottom-color:var(--ink);box-shadow:0 -6px 14px rgba(228,238,240,.35),0 6px 14px rgba(228,238,240,.35)}");
   sendP("label.btn input{position:absolute;opacity:0;pointer-events:none}");
-  sendP("label.btn.on{background:rgba(212,238,242,.28);border-color:rgba(212,238,242,.5);color:#fff;box-shadow:inset 0 0 14px rgba(212,238,242,.18)}");
+  sendP("label.btn.on,button.btn.on{background:rgba(212,238,242,.28);border-color:rgba(212,238,242,.5);color:#fff;box-shadow:inset 0 0 14px rgba(212,238,242,.18)}");
   sendP(".fork{margin-left:auto;display:inline-flex;align-items:center;gap:8px}");
-  sendP("button.apply{position:relative;display:block;width:100%;margin-top:16px;padding:14px 12px;border:0;cursor:pointer;color:#fff;font:700 13px Consolas,monospace;letter-spacing:.26em;text-transform:uppercase;text-shadow:0 0 8px #fff,0 0 18px rgba(62,224,216,.75);background:transparent;overflow:visible}");
+  sendP("button.apply{position:relative;display:block;width:100%;margin-top:16px;padding:14px 44px;border:0;cursor:pointer;color:#fff;font:700 13px Consolas,monospace;letter-spacing:.26em;text-transform:uppercase;text-shadow:0 0 8px #fff,0 0 18px rgba(62,224,216,.75);background:transparent;overflow:visible}");
   sendP("button.apply span{position:relative;z-index:1}");
-  sendP("button.apply:after{content:'';position:absolute;inset:0;pointer-events:none;background:rgba(62,224,216,.14);clip-path:polygon(14px 0,calc(100% - 14px) 0,100% 14px,100% calc(100% - 14px),calc(100% - 14px) 100%,14px 100%,0 calc(100% - 14px),0 14px)}");
-  sendP("button.apply:before{content:'';position:absolute;inset:0;pointer-events:none;background:linear-gradient(135deg,transparent 46%,#c8ffff 46%,#c8ffff 54%,transparent 54%) left top/14px 14px no-repeat,linear-gradient(225deg,transparent 46%,#c8ffff 46%,#c8ffff 54%,transparent 54%) right top/14px 14px no-repeat,linear-gradient(45deg,transparent 46%,#c8ffff 46%,#c8ffff 54%,transparent 54%) left bottom/14px 14px no-repeat,linear-gradient(-45deg,transparent 46%,#c8ffff 46%,#c8ffff 54%,transparent 54%) right bottom/14px 14px no-repeat,linear-gradient(#c8ffff,#c8ffff) left 14px top 0/1.5% 2px no-repeat,linear-gradient(#c8ffff,#c8ffff) right 14px top 0/1.5% 2px no-repeat,linear-gradient(#c8ffff,#c8ffff) left 14px bottom 0/1.5% 2px no-repeat,linear-gradient(#c8ffff,#c8ffff) right 14px bottom 0/1.5% 2px no-repeat;filter:drop-shadow(0 0 2px #eaffff) drop-shadow(0 0 6px #3ee0d8) drop-shadow(0 0 14px rgba(62,224,216,.75))}");
-  sendP("button.apply:hover:after{background:rgba(62,224,216,.22)}");
+  sendP("button.apply:after{content:'';position:absolute;inset:0;pointer-events:none;background:rgba(8,12,16,.92);clip-path:polygon(14px 0,calc(100% - 14px) 0,100% 14px,100% calc(100% - 14px),calc(100% - 14px) 100%,14px 100%,0 calc(100% - 14px),0 14px);filter:drop-shadow(1px 0 0 rgba(62,224,216,.4)) drop-shadow(-1px 0 0 rgba(62,224,216,.4)) drop-shadow(0 1px 0 rgba(62,224,216,.4)) drop-shadow(0 -1px 0 rgba(62,224,216,.4))}");
+  sendP("button.apply:before{content:'';position:absolute;inset:0;pointer-events:none;z-index:2;background:linear-gradient(135deg,transparent 46%,#c8ffff 46%,#c8ffff 54%,transparent 54%) left top/14px 14px no-repeat,linear-gradient(225deg,transparent 46%,#c8ffff 46%,#c8ffff 54%,transparent 54%) right top/14px 14px no-repeat,linear-gradient(45deg,transparent 46%,#c8ffff 46%,#c8ffff 54%,transparent 54%) left bottom/14px 14px no-repeat,linear-gradient(-45deg,transparent 46%,#c8ffff 46%,#c8ffff 54%,transparent 54%) right bottom/14px 14px no-repeat,linear-gradient(#c8ffff,#c8ffff) left 14px top 0/1.5% 2px no-repeat,linear-gradient(#c8ffff,#c8ffff) right 14px top 0/1.5% 2px no-repeat,linear-gradient(#c8ffff,#c8ffff) left 14px bottom 0/1.5% 2px no-repeat,linear-gradient(#c8ffff,#c8ffff) right 14px bottom 0/1.5% 2px no-repeat;filter:drop-shadow(0 0 2px #eaffff) drop-shadow(0 0 6px #3ee0d8) drop-shadow(0 0 14px rgba(62,224,216,.75))}");
+  sendP("button.apply:hover:after{background:rgba(12,18,22,.96)}");
   sendP("button.apply:hover:before{filter:drop-shadow(0 0 3px #fff) drop-shadow(0 0 8px #3ee0d8) drop-shadow(0 0 18px rgba(62,224,216,.9))}");
   sendP("button.apply:active:before{filter:drop-shadow(0 0 4px #3ee0d8)}");
+  sendP("button.apply .arr-l,button.apply .arr-r{position:absolute;top:50%;z-index:3;width:8px;height:8px;border-top:2.5px solid #c8ffff;border-right:2.5px solid #c8ffff;pointer-events:none;animation:arrPulse 1.6s ease-in-out infinite;filter:drop-shadow(0 0 2px #eaffff) drop-shadow(0 0 6px #3ee0d8)}");
+  sendP("button.apply .arr-r{right:18px;transform:translateY(-50%) rotate(45deg)}");
+  sendP("button.apply .arr-l{left:18px;transform:translateY(-50%) rotate(-135deg)}");
+  sendP("@keyframes arrPulse{0%,100%{opacity:1}50%{opacity:.28}}");
   sendP(".set{margin-top:22px;padding-top:14px;border-top:1px solid var(--rule)}");
   sendP(".set summary{position:relative;cursor:pointer;list-style:none;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink);font-weight:600;display:flex;align-items:center;justify-content:flex-start;gap:12px;user-select:none;padding:6px 8px 6px 12px;border:1px solid var(--rule);background:linear-gradient(90deg,rgba(212,238,242,.1),transparent 55%)}");
   sendP(".set summary::-webkit-details-marker,.set summary::-moz-list-bullet{display:none}");
@@ -183,7 +189,7 @@ void sendHTML(bool loggedIn) {
   sendP(".gate p{margin:6px 0 16px;color:var(--mute);font-size:12px;letter-spacing:.04em}");
   sendP(".gate input{width:100%;margin:0 0 10px;padding:9px;border:1px solid var(--rule);background:var(--glass);color:var(--ink);text-align:center;letter-spacing:.2em}");
   sendP(".gate button{width:100%;padding:10px;border:0;background:var(--amber);color:#06080b;font-weight:700;letter-spacing:.16em;text-transform:uppercase;cursor:pointer;clip-path:polygon(10px 0,100% 0,calc(100% - 10px) 100%,0 100%)}");
-  sendP("@media(max-width:620px){.antenna{grid-template-columns:1fr;gap:8px}.hub{order:-1;margin-bottom:8px;width:100%;max-width:280px;height:auto;aspect-ratio:1}.schem{display:none}.rig{padding:8px 0 4px}.mast{flex-direction:column;align-items:flex-start}.call{text-align:left}.fork{margin-left:0}.mast:before{display:none}}");
+  sendP("@media(max-width:620px){.antenna{grid-template-columns:1fr 1fr;grid-template-areas:\"hub hub\" \"left right\";gap:0 8px;align-items:start}.hub{grid-area:hub;order:0;margin:0 auto;width:min(248px,78vw);max-width:248px;height:auto;aspect-ratio:1/.74;overflow:visible}.hub .cradle,.tick-clip{top:50%}.feed{top:40%;width:48%}.left{grid-area:left}.right{grid-area:right}.col{gap:4px}.pair{grid-template-columns:1fr;gap:4px}.w{min-height:50px;padding:8px 8px;width:100%;gap:8px}.w .id{font-size:14px}.w select{flex:1 1 auto;width:auto;min-width:0;font-size:13px;padding:7px 18px 7px 6px}.schem{display:none}.rig{padding:0 4px;margin:0}.mast{flex-direction:column;align-items:flex-start;margin-bottom:0;padding-bottom:6px}.call{text-align:left}.fork{margin-left:0}.mast:before{display:none}.set summary{padding-right:36px}.set summary::after{left:auto;right:10px;transform:translateY(-50%)}}");
   sendP("</style></head><body>");
     
   if (!loggedIn) {
@@ -210,8 +216,10 @@ void sendHTML(bool loggedIn) {
   sendP("<form id='p-off' action='/profile' method='POST' hidden><input type='hidden' name='type' value='clear_all'></form>");
   sendP("<form id='p-left' action='/profile' method='POST' hidden><input type='hidden' name='type' value='beam_left'></form>");
   sendP("<form id='p-right' action='/profile' method='POST' hidden><input type='hidden' name='type' value='beam_right'></form>");
+  sendP("<form id='p-phone' action='/profile' method='POST' hidden><input type='hidden' name='type' value='phone'></form>");
+  sendP("<form id='p-rtty' action='/profile' method='POST' hidden><input type='hidden' name='type' value='rtty'></form>");
   
-  sendP("<form action='/set' method='GET'>");
+  sendP("<form action='/set' method='POST'>");
 
   String t1Display, t2Display, anomalyDisplay, anomalyColor;
   hubFields(anomalyDisplay, anomalyColor, t1Display, t2Display);
@@ -272,17 +280,13 @@ void sendHTML(bool loggedIn) {
   sendP("<button type='submit' form='p-right' class='btn'>Lúč vpravo</button>");
   sendP("<a href='/toggleStandby' class='btn btn-standby'>Stand-by</a>");
   sendP("<span class='fork'><span class='k'>Výhybka</span>");
-  sendP("<label class='btn ");
-  sendS((currentMode == "PHONE") ? "on" : "");
-  sendP("'><input type='radio' name='fork_mode' value='PHONE'");
-  sendS((currentMode == "PHONE") ? " checked" : "");
-  sendP(">PHONE</label>");
-  sendP("<label class='btn ");
-  sendS((currentMode == "RTTY") ? "on" : "");
-  sendP("'><input type='radio' name='fork_mode' value='RTTY'");
-  sendS((currentMode == "RTTY") ? " checked" : "");
-  sendP(">RTTY</label></span></div>");
-  sendP("<button type='submit' class='apply'><span>Poslať na stožiar</span></button></form>");
+  sendP("<button type='submit' form='p-phone' class='btn");
+  sendS((currentMode == "PHONE") ? " on" : "");
+  sendP("' data-mode='PHONE'>PHONE</button>");
+  sendP("<button type='submit' form='p-rtty' class='btn");
+  sendS((currentMode == "RTTY") ? " on" : "");
+  sendP("' data-mode='RTTY'>RTTY</button></span></div>");
+  sendP("<button type='submit' class='apply'><span>Poslať na stožiar</span><i class='arr-l' aria-hidden='true'></i><i class='arr-r' aria-hidden='true'></i></button></form>");
 
   int currentPercent = clampLedPercent(ledPercent);
   sendP("<details class='set'><summary>Nastavenia stanice</summary><form action='/updateConfig' method='POST'>");
@@ -303,7 +307,6 @@ void sendHTML(bool loggedIn) {
   sendP("<p class='foot'>/// MAST NODE · INVERTED-V · HALF-DUPLEX RS485</p></div>");
 
   sendP("<script>");
-  sendP("document.querySelectorAll('.fork input').forEach(function(r){r.addEventListener('change',function(){document.querySelectorAll('.fork label').forEach(function(l){l.classList.toggle('on',l.querySelector('input').checked)});var m=document.querySelector('.feed .mode');if(m)m.textContent=this.value;});});");
   sendP("let isUserInteracting=false,interactTimer=null;");
   sendP("function markInteract(){isUserInteracting=true;clearTimeout(interactTimer);interactTimer=setTimeout(function(){isUserInteracting=false},8000)}");
   sendP("document.querySelectorAll('select').forEach(function(el){el.addEventListener('click',markInteract)});");
@@ -354,18 +357,29 @@ void sendHTML(bool loggedIn) {
   sendP("svg.innerHTML=h}window.drawSchem=drawSchem;");
   sendP("document.querySelectorAll('.w select').forEach(function(s){s.addEventListener('change',function(){markInteract();var w=s.parentNode;w.classList.remove('w-A','w-B','w-C','w-pending');w.classList.add('w-'+s.value);var sy=w.querySelector('.sync');if(sy)sy.remove();drawSchem()})});");
   sendP("window.addEventListener('resize',drawSchem);drawSchem()})();");
-  sendP("var setPanel=document.querySelector('details.set');");
-  sendP("setInterval(function(){if(isUserInteracting||(setPanel&&setPanel.open))return;");
-  sendP("fetch('/api/status').then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(d){");
-  sendP("var el=document.getElementById('web-status');if(!el)return;");
-  sendP("var s=d.s||'';");
-  sendP("if(s==='STANDBY')s='SPÁNOK';if(s==='NONE'||s==='OK')s='OK';if(s==='OFFLINE')s='TIMEOUT';if(s==='WAITING')s='ČAKÁ SA';");
-  sendP("if(s==='ČAKÁ SA')return;");
+  sendP("function hubNorm(s){s=s||'';if(s==='STANDBY')s='SPÁNOK';if(s==='NONE'||s==='OK')s='OK';if(s==='OFFLINE')s='TIMEOUT';if(s==='WAITING')s='ČAKÁ SA';return s}");
+  sendP("function applyHub(d){if(!d)return;var s=hubNorm(d.s),el=document.getElementById('web-status');");
+  sendP("if(el){el.textContent=s;el.setAttribute('data-current',s)}");
   sendP("var t1=document.getElementById('t1'),t2=document.getElementById('t2');");
   sendP("if(t1&&d.t1)t1.textContent=d.t1;if(t2&&d.t2)t2.textContent=d.t2;");
   sendP("var hub=document.querySelector('.hub'),mode=document.querySelector('.feed .mode'),diag=document.querySelector('.diag');");
   sendP("if(d.c){if(hub)hub.style.setProperty('--feed',d.c);if(mode)mode.style.color=d.c;if(diag)diag.style.color=d.c}");
-  sendP("if(s!==el.getAttribute('data-current'))location.reload();}).catch(function(){})},5000);");
+  sendP("if(d.m&&mode)mode.textContent=d.m;");
+  sendP("if(d.m)document.querySelectorAll('.fork .btn').forEach(function(b){b.classList.toggle('on',b.getAttribute('data-mode')===d.m)});");
+  sendP("if(d.w&&d.k&&!isUserInteracting){for(var i=0;i<8;i++){var sel=document.querySelector('select[name=\"l'+i+'\"]');if(!sel)continue;");
+  sendP("var t=d.w.charAt(i)||'C',cur=d.k.charAt(i)||'C',pending=s!=='SPÁNOK'&&t!==cur,w=sel.parentNode;");
+  sendP("sel.value=t;w.classList.remove('w-A','w-B','w-C','w-pending');w.classList.add(pending?'w-pending':'w-'+t);");
+  sendP("var sy=w.querySelector('.sync');if(pending){if(!sy){sy=document.createElement('span');sy.className='sync';sy.title='Čaká sa na potvrdenie zo stožiara';sy.textContent='SYNC';w.insertBefore(sy,sel)}}else if(sy)sy.remove()}");
+  sendP("if(window.drawSchem)drawSchem()}}");
+  sendP("function postAjax(form){isUserInteracting=false;clearTimeout(interactTimer);var body=new URLSearchParams(new FormData(form));body.append('ajax','1');");
+  sendP("fetch(form.getAttribute('action')||'/set',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:body.toString()}).then(function(r){return r.json()}).then(function(d){applyHub(d);armPoll(800)}).catch(function(){})}");
+  sendP("document.querySelectorAll('form[action=\"/set\"],form[action=\"/profile\"]').forEach(function(f){f.addEventListener('submit',function(e){e.preventDefault();postAjax(f)})});");
+  sendP("var setPanel=document.querySelector('details.set'),pollTimer=null;");
+  sendP("function pollWait(s){return s==='ČAKÁ SA'?800:5000}");
+  sendP("function armPoll(ms){clearTimeout(pollTimer);pollTimer=setTimeout(tick,ms)}");
+  sendP("function tick(){if(isUserInteracting||(setPanel&&setPanel.open)){armPoll(800);return}");
+  sendP("fetch('/api/status').then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(d){applyHub(d);armPoll(pollWait(hubNorm(d.s)))}).catch(function(){armPoll(5000)})}");
+  sendP("var boot=document.getElementById('web-status');armPoll(pollWait(boot?boot.getAttribute('data-current'):''));");
   sendP("</script></body></html>");
   server.sendContent("", 0);
 }
