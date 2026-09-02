@@ -36,7 +36,7 @@ Profily **Lúč vľavo** / **Lúč vpravo** nastavia celú stranu naraz. **Vypn�
 | `ovladanie-antena-ext-box.ino` | Master — Wi-Fi, web, RS485, LED, OLED, USB |
 | `html_pages.h` | HUD (HTML/CSS/JS), posielané po častiach |
 | `config.h` | Piny, timeout, `extern` stavy |
-| `ovladanie-antena-klient-nano.ino` | Firmware stožiara — **nemení sa** |
+| `nano/ovladanie-antena-klient-nano.ino` | Firmware stožiara — **nemeniť, nenahrávať s masterom** |
 | `preview-web-ui.html` | Náhľad HUD v prehliadači bez ESP32 |
 
 ## HUD — stavy v strede
@@ -88,7 +88,7 @@ Náhľad bez hardvéru: otvor `preview-web-ui.html`.
 ## Nahratie firmware
 
 1. Master: Arduino IDE / board ESP32-C3, sketch `ovladanie-antena-ext-box.ino` (pribalí `config.h` a `html_pages.h`).
-2. Klient: Nano, sketch `ovladanie-antena-klient-nano.ino` — len ak ide nový kus; bežiaci stožiar sa neprepisuje.
+2. Klient: Nano, sketch `nano/ovladanie-antena-klient-nano.ino` — len ak ide nový kus; bežiaci stožiar sa neprepisuje.
 3. SSID, heslo a PIN sa nastavia vo webe (Nastavenia stanice) a ostanú v NVS. V zdroji nie sú.
 
 USB konzola na masteri berie príkazy ako `SETVAL` / `SETMODE` (rovnaká anténa, bez webu).

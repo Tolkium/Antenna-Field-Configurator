@@ -2,7 +2,7 @@
 
 **Dátum:** 2026-08-28  
 **Master (mení sa):** `ovladanie-antena-ext-box.ino`, `html_pages.h`, `config.h`  
-**Klient (NEMENÍ sa):** `ovladanie-antena-klient-nano.ino` — Arduino Nano na stožiari  
+**Klient (NEMENÍ sa):** `nano/ovladanie-antena-klient-nano.ino` — Arduino Nano na stožiari  
 **Priorita:** funkčnosť pred bezpečnosťou (LAN je zabezpečená; bezpečnosť je v samostatnej sekcii, nie na vrchu)
 
 Tento súbor nahrádza predchádzajúci zoznam ako pracovný podklad na opravy. Starý `ANALYZA-BUGY-A-EDGE-CASES.md` ber ako históriu — niekoľko bodov tam bolo zlých (stand-by, bezpečnosť ako P0).

@@ -4,6 +4,7 @@
 #include <WiFi.h>
 #include <WebServer.h>
 #include <Wire.h>
+#include <SPI.h>
 #include <Adafruit_PWMServoDriver.h>
 #include <U8g2lib.h>
 #include <Preferences.h>
