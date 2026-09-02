@@ -5,3 +5,4 @@
 *.map
 Thumbs.db
 .DS_Store
+config_wifi.local.h
